@@ -1,0 +1,139 @@
+import 'dart:convert';
+import 'package:equatable/equatable.dart';
+
+class Movie extends Equatable {
+  final int id;
+  final String? title;
+  final double? voteAverage;
+  final int? voteCount;
+  final String? status;
+  final String? releaseDate;
+  final int? revenue;
+  final int? runtime;
+  final bool? adult;
+  final String? backdropPath;
+  final int? budget;
+  final String? homepage;
+  final String? imdbId;
+  final String? originalLanguage;
+  final String? originalTitle;
+  final String? overview;
+  final double? popularity;
+  final String? posterPath;
+  final String? tagline;
+  final List<String> genres;
+  final String? productionCompanies;
+  final String? productionCountries;
+  final String? spokenLanguages;
+  final String? keywords;
+
+  const Movie({
+    required this.id,
+    this.title,
+    this.voteAverage,
+    this.voteCount,
+    this.status,
+    this.releaseDate,
+    this.revenue,
+    this.runtime,
+    this.adult,
+    this.backdropPath,
+    this.budget,
+    this.homepage,
+    this.imdbId,
+    this.originalLanguage,
+    this.originalTitle,
+    this.overview,
+    this.popularity,
+    this.posterPath,
+    this.tagline,
+    this.genres = const [],
+    this.productionCompanies,
+    this.productionCountries,
+    this.spokenLanguages,
+    this.keywords,
+  });
+
+  String get fullPosterUrl {
+    if (posterPath != null) {
+      return 'https://image.tmdb.org/t/p/w500$posterPath';
+    }
+    return 'https://via.placeholder.com/500x750.png?text=No+Image';
+  }
+
+  String get fullBackdropUrl {
+    if (backdropPath != null) {
+      return 'https://image.tmdb.org/t/p/w1280$backdropPath';
+    }
+    return 'https://via.placeholder.com/1280x720.png?text=No+Image';
+  }
+
+  factory Movie.fromMap(Map<String, dynamic> map) {
+    return Movie(
+      id: map['id'] ?? 0,
+      title: map['title'],
+      voteAverage: map['vote_average']?.toDouble(),
+      voteCount: map['vote_count'],
+      status: map['status'],
+      releaseDate: map['release_date'],
+      revenue: map['revenue'],
+      runtime: map['runtime'],
+      adult: map['adult'] == 1,
+      backdropPath: map['backdrop_path'],
+      budget: map['budget'],
+      homepage: map['homepage'],
+      imdbId: map['imdb_id'],
+      originalLanguage: map['original_language'],
+      originalTitle: map['original_title'],
+      overview: map['overview'],
+      popularity: map['popularity']?.toDouble(),
+      posterPath: map['poster_path'],
+      tagline: map['tagline'],
+      genres: _parseGenres(map['genres']),
+      productionCompanies: map['production_companies'],
+      productionCountries: map['production_countries'],
+      spokenLanguages: map['spoken_languages'],
+      keywords: map['keywords'],
+    );
+  }
+
+  static List<String> _parseGenres(String? genreString) {
+    if (genreString == null || genreString.isEmpty) {
+      return [];
+    }
+    try {
+      final List<dynamic> decoded = json.decode(genreString);
+      return decoded.map((genre) => genre['name'] as String).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        voteAverage,
+        voteCount,
+        status,
+        releaseDate,
+        revenue,
+        runtime,
+        adult,
+        backdropPath,
+        budget,
+        homepage,
+        imdbId,
+        originalLanguage,
+        originalTitle,
+        overview,
+        popularity,
+        posterPath,
+        tagline,
+        genres,
+        productionCompanies,
+        productionCountries,
+        spokenLanguages,
+        keywords,
+      ];
+}

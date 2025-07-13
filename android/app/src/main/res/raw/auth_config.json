@@ -1,0 +1,12 @@
+{
+  "client_id": "d6f8a849-50fd-4cf3-a858-6048ee72adfd",
+  "authorization_user_agent": "DEFAULT",
+  "redirect_uri": "msauth://com.example.mood_ai/%2Flp2UiQUhRUX0GTuOqe0aogTCuU%3D",
+  "account_mode": "SINGLE",
+  "authorities": [
+    {
+      "type": "B2C",
+      "authority_url": "https://moodAuth.b2clogin.com/moodAuth.onmicrosoft.com/B2X_1_susi/"
+    }
+  ]
+} 
