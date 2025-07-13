@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mood_ai/src/data/repositories/auth_repository.dart';
 import 'package:mood_ai/src/data/repositories/content_repository.dart';
 import 'package:mood_ai/src/data/services/database_service.dart';
 import 'package:mood_ai/src/logic/auth/auth_cubit.dart';
 import 'package:mood_ai/src/presentation/screens/app.dart';
 
-void main() async {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseService.instance.database; // Initialize the database
 
   final authRepository = AuthRepository();
-  final contentRepository = ContentRepository();
+  final databaseService = DatabaseService.instance;
+  final contentRepository = ContentRepository(databaseService: databaseService);
 
   runApp(
     MultiRepositoryProvider(

@@ -12,6 +12,58 @@ import 'package:mood_ai/src/logic/discovery/discovery_state.dart';
 import 'package:mood_ai/src/models/movie.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+// Helper widget to report its size to a callback.
+class _SizeReportingWidget extends StatefulWidget {
+  final Widget child;
+  final ValueChanged<Size> onSizeChanged;
+
+  const _SizeReportingWidget({
+    Key? key,
+    required this.child,
+    required this.onSizeChanged,
+  }) : super(key: key);
+
+  @override
+  State<_SizeReportingWidget> createState() => _SizeReportingWidgetState();
+}
+
+class _SizeReportingWidgetState extends State<_SizeReportingWidget> {
+  final _widgetKey = GlobalKey();
+  Size? _lastReportedSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _reportSize();
+  }
+
+  void _reportSize() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final size = _widgetKey.currentContext?.size;
+      if (size != null && size != _lastReportedSize) {
+        _lastReportedSize = size;
+        widget.onSizeChanged(size);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _SizeReportingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _reportSize();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: _widgetKey,
+      child: widget.child,
+    );
+  }
+}
+
+
 class DiscoveryScreen extends StatelessWidget {
   const DiscoveryScreen({super.key});
 
@@ -27,60 +79,16 @@ class DiscoveryScreen extends StatelessWidget {
   }
 }
 
-class _DiscoveryView extends StatelessWidget {
+class _DiscoveryView extends StatefulWidget {
   const _DiscoveryView();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          BlocBuilder<DiscoveryBloc, DiscoveryState>(
-            builder: (context, state) {
-              if (state.searchStatus != SearchStatus.initial || state.searchResults.isNotEmpty) {
-                return _SearchResultsBody(state: state);
-              } else {
-                return const _DiscoveryBody();
-              }
-            },
-          ),
-          BlocBuilder<DiscoveryBloc, DiscoveryState>(
-            buildWhen: (p, c) => p.isListening != c.isListening,
-            builder: (context, state) {
-              if (!state.isListening) return const SizedBox.shrink();
-              return const _VoiceVisualizer();
-            },
-          ),
-          BlocBuilder<DiscoveryBloc, DiscoveryState>(
-            builder: (context, state) {
-              final isInSearchMode = state.searchStatus != SearchStatus.initial;
-              return AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                left: 16,
-                right: 16,
-                bottom: isInSearchMode ? null : 24.0,
-                top: isInSearchMode ? 24.0 : null,
-                child: const _SearchWidget(),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  State<_DiscoveryView> createState() => _DiscoveryViewState();
 }
 
-class _SearchWidget extends StatefulWidget {
-  const _SearchWidget();
-
-  @override
-  State<_SearchWidget> createState() => _SearchWidgetState();
-}
-
-class _SearchWidgetState extends State<_SearchWidget> {
+class _DiscoveryViewState extends State<_DiscoveryView> {
   late final TextEditingController _searchController;
-  bool _isButtonPressed = false;
+  double _searchBarHeight = 72.0; // Default height (56) + padding
 
   @override
   void initState() {
@@ -88,9 +96,11 @@ class _SearchWidgetState extends State<_SearchWidget> {
     _searchController = TextEditingController();
 
     _searchController.addListener(() {
-      final bloc = context.read<DiscoveryBloc>();
-      if (_searchController.text != bloc.state.recognizedText) {
-        bloc.add(SearchQueryChanged(_searchController.text));
+      if (context.mounted) {
+        final bloc = context.read<DiscoveryBloc>();
+        if (_searchController.text != bloc.state.recognizedText) {
+          bloc.add(SearchQueryChanged(_searchController.text));
+        }
       }
     });
   }
@@ -106,96 +116,168 @@ class _SearchWidgetState extends State<_SearchWidget> {
     return BlocConsumer<DiscoveryBloc, DiscoveryState>(
       listenWhen: (p, c) => p.recognizedText != c.recognizedText,
       listener: (context, state) {
-        _searchController.text = state.recognizedText;
-        _searchController.selection = TextSelection.fromPosition(
-          TextPosition(offset: _searchController.text.length),
-        );
+        if (_searchController.text != state.recognizedText) {
+          _searchController.text = state.recognizedText;
+          _searchController.selection = TextSelection.fromPosition(
+            TextPosition(offset: _searchController.text.length),
+          );
+        }
       },
-      buildWhen: (p, c) =>
-          p.isListening != c.isListening || p.recognizedText != c.recognizedText || p.searchStatus != c.searchStatus,
       builder: (context, state) {
-        final isListening = state.isListening;
         final isInSearchMode = state.searchStatus != SearchStatus.initial;
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        minLines: 1,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText:
-                              isListening ? 'Listening...' : "What's your mood?",
-                          suffixIcon: isInSearchMode
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    context.read<DiscoveryBloc>().add(ClearSearch());
-                                  },
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                  ],
+
+        return Scaffold(
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Body
+              if (isInSearchMode)
+                _SearchResultsBody(
+                  state: state,
+                  topPadding: _searchBarHeight,
+                )
+              else
+                const _DiscoveryBody(),
+
+              // Voice Visualizer
+              if (state.isListening) const _VoiceVisualizer(),
+
+              // Search Bar
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                top: isInSearchMode ? MediaQuery.of(context).padding.top : null,
+                left: 16,
+                right: isInSearchMode ? 16 : (16 + 56 + 8),
+                bottom: isInSearchMode ? null : 24,
+                child: _SizeReportingWidget(
+                  onSizeChanged: (size) =>
+                      setState(() => _searchBarHeight = size.height),
+                  child: _SearchBar(controller: _searchController),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onLongPressStart: (_) {
-                setState(() => _isButtonPressed = true);
-                context.read<DiscoveryBloc>().add(StartVoiceSearch());
-              },
-              onLongPressEnd: (_) {
-                setState(() => _isButtonPressed = false);
-                context.read<DiscoveryBloc>().add(StopVoiceSearch());
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isListening
-                      ? Colors.red.withOpacity(0.7)
-                      : Theme.of(context).colorScheme.primary,
-                  boxShadow: [
-                    if (_isButtonPressed || isListening)
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.4),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      )
-                  ],
-                ),
-                child: Icon(
-                  isListening ? Icons.mic : Icons.mic_none,
-                  color: Colors.white,
-                  size: 32,
-                ),
+
+              // Mic Button
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                bottom: 24,
+                right: 16,
+                child: const _MicButton(),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
   }
 }
+
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DiscoveryBloc, DiscoveryState>(
+      buildWhen: (p, c) =>
+          p.isListening != c.isListening || p.searchStatus != c.searchStatus,
+      builder: (context, state) {
+        final isListening = state.isListening;
+        final isInSearchMode = state.searchStatus != SearchStatus.initial;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: kElevationToShadow[2],
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  maxLines: null, // Allows the text field to grow
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText:
+                        isListening ? 'Listening...' : "What's your mood?",
+                    suffixIcon: isInSearchMode
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              controller.clear();
+                              context.read<DiscoveryBloc>().add(ClearSearch());
+                            },
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MicButton extends StatefulWidget {
+  const _MicButton();
+  @override
+  State<_MicButton> createState() => _MicButtonState();
+}
+
+class _MicButtonState extends State<_MicButton> {
+  bool _isButtonPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DiscoveryBloc, DiscoveryState>(
+      buildWhen: (p, c) => p.isListening != c.isListening,
+      builder: (context, state) {
+        final isListening = state.isListening;
+        return GestureDetector(
+          onLongPressStart: (_) {
+            setState(() => _isButtonPressed = true);
+            context.read<DiscoveryBloc>().add(StartVoiceSearch());
+          },
+          onLongPressEnd: (_) {
+            setState(() => _isButtonPressed = false);
+            context.read<DiscoveryBloc>().add(StopVoiceSearch());
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isListening
+                  ? Colors.red.withOpacity(0.7)
+                  : Theme.of(context).colorScheme.primary,
+              boxShadow: [
+                if (_isButtonPressed || isListening)
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.4),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  )
+              ],
+            ),
+            child: Icon(
+              isListening ? Icons.mic : Icons.mic_none,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 
 class _VoiceVisualizer extends StatelessWidget {
   const _VoiceVisualizer();
@@ -273,8 +355,9 @@ class _VisualizerPainter extends CustomPainter {
 
 class _SearchResultsBody extends StatelessWidget {
   final DiscoveryState state;
+  final double topPadding;
 
-  const _SearchResultsBody({required this.state});
+  const _SearchResultsBody({required this.state, required this.topPadding});
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +373,11 @@ class _SearchResultsBody extends StatelessWidget {
           return const Center(child: Text('No results found.'));
         }
         return ListView.builder(
-          padding: const EdgeInsets.only(top: 80, bottom: 24),
+          // Add dynamic padding to avoid being obscured by the search bar
+          padding: EdgeInsets.only(
+            top: topPadding + MediaQuery.of(context).padding.top + 16,
+            bottom: 24,
+          ),
           itemCount: state.searchResults.length,
           itemBuilder: (context, index) {
             final movie = state.searchResults[index];
@@ -303,7 +390,8 @@ class _SearchResultsBody extends StatelessWidget {
                     )
                   : const Icon(Icons.movie, size: 50),
               title: Text(movie.title ?? 'Unknown Title'),
-              subtitle: Text(movie.overview ?? '', maxLines: 2, overflow: TextOverflow.ellipsis),
+              subtitle: Text(movie.overview ?? '',
+                  maxLines: 2, overflow: TextOverflow.ellipsis),
               onTap: () => context.push('/details', extra: movie),
             );
           },

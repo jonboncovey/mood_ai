@@ -82,6 +82,7 @@ The state management will be handled by the `flutter_bloc` package. BLoCs will b
 ### `DiscoveryBloc`
 
 *   **Responsibility:** A unified BLoC that manages both the browsing of curated content lists and the natural language search functionality. It orchestrates voice recognition, NLP, and fetching content from the repository. If a mood is detected in a search query, it updates the global `MoodCubit`.
+*   **Note:** The ContentRepository now uses Azure OpenAI for intelligent query processing, extracting genres and vibes, filtering the DB, and ranking results.
 *   **State:** The state reflects whether the user is browsing or searching.
     *   `DiscoveryInitial`: The default state.
     *   `DiscoveryLoading`: Showing a loading indicator for the initial content lists.

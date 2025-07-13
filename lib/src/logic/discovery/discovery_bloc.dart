@@ -86,7 +86,9 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     Emitter<DiscoveryState> emit,
   ) {
     emit(state.copyWith(recognizedText: event.text));
-    add(SearchQueryChanged(event.text));
+    if (event.isFinal) {
+      add(SearchQueryChanged(event.text));
+    }
   }
 
   Future<void> _onStopVoiceSearch(
