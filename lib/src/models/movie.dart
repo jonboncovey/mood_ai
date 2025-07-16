@@ -26,6 +26,7 @@ class Movie extends Equatable {
   final String? productionCountries;
   final String? spokenLanguages;
   final String? keywords;
+  final Map<String, dynamic>? streamingOptions;
 
   const Movie({
     required this.id,
@@ -52,6 +53,7 @@ class Movie extends Equatable {
     this.productionCountries,
     this.spokenLanguages,
     this.keywords,
+    this.streamingOptions,
   });
 
   String get fullPosterUrl {
@@ -94,6 +96,7 @@ class Movie extends Equatable {
       productionCountries: map['production_countries'],
       spokenLanguages: map['spoken_languages'],
       keywords: map['keywords'],
+      streamingOptions: _parseStreamingOptions(map['streaming_options']),
     );
   }
 
@@ -106,6 +109,17 @@ class Movie extends Equatable {
       return decoded.map((genre) => genre['name'] as String).toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  static Map<String, dynamic>? _parseStreamingOptions(String? streamingOptionsString) {
+    if (streamingOptionsString == null || streamingOptionsString.isEmpty) {
+      return null;
+    }
+    try {
+      return json.decode(streamingOptionsString) as Map<String, dynamic>;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -135,5 +149,6 @@ class Movie extends Equatable {
         productionCountries,
         spokenLanguages,
         keywords,
+        streamingOptions,
       ];
 }

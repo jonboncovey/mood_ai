@@ -1,14 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mood_ai/src/data/repositories/content_repository.dart';
 import 'package:mood_ai/src/models/movie.dart';
+import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'discovery_event.dart';
 import 'discovery_state.dart';
+import '../../config/app_config.dart';
 
 class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
   final ContentRepository _contentRepository;
   final SpeechToText _speechToText;
+  final StreamingPlatformsCubit _streamingPlatformsCubit;
+  List<String> _selectedStreamingServices = [];
 
   static const List<String> _genresToFetch = [
     'Romance',
@@ -21,8 +25,10 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
   DiscoveryBloc({
     required ContentRepository contentRepository,
     required SpeechToText speechToText,
+    required StreamingPlatformsCubit streamingPlatformsCubit,
   })  : _contentRepository = contentRepository,
         _speechToText = speechToText,
+        _streamingPlatformsCubit = streamingPlatformsCubit,
         super(const DiscoveryState()) {
     on<FetchDiscoveryData>(_onFetchDiscoveryData);
     on<SearchQueryChanged>(
@@ -38,6 +44,11 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     on<VoiceSoundLevelChanged>(_onVoiceSoundLevelChanged);
     on<UpdateRecognizedText>(_onUpdateRecognizedText);
     on<ClearSearch>(_onClearSearch);
+
+    // Listen for streaming platform changes and refetch data
+    _streamingPlatformsCubit.stream.listen((_) {
+      add(FetchDiscoveryData());
+    });
   }
 
   void _onClearSearch(
@@ -127,20 +138,34 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
   ) async {
     emit(state.copyWith(fetchStatus: FetchStatus.loading));
     try {
-      // First, get a general list of popular movies to ensure we have some content.
-      final popularMovies =
-          await _contentRepository.getPopularMovies(limit: 10);
       final Map<String, List<Movie>> moviesByGenre = {};
 
-      if (popularMovies.isNotEmpty) {
-        moviesByGenre['Popular'] = popularMovies;
-      }
+      // Get selected streaming platforms, but only if the feature is enabled
+      final selectedPlatforms = AppConfig.streamingFeatureEnabled
+          ? _streamingPlatformsCubit.selectedPlatformIds
+          : <String>[];
+          
+      print(
+          'Fetching discovery data with streaming platforms: ${selectedPlatforms.join(", ")}');
 
-      for (String genre in _genresToFetch) {
-        final movies =
-            await _contentRepository.getMoviesByGenre(genre, limit: 10);
-        if (movies.isNotEmpty) {
-          moviesByGenre[genre] = movies;
+      // A map of section titles to futures that fetch the movies for that section.
+      final Map<String, Future<List<Movie>>> sectionsToFetch = {
+        'Popular': _contentRepository.getPopularMovies(limit: 10, selectedPlatforms: selectedPlatforms),
+        'Critically Acclaimed': _contentRepository.getCriticallyAcclaimed(limit: 10, selectedPlatforms: selectedPlatforms),
+        'Hidden Gems': _contentRepository.getHiddenGems(limit: 10, selectedPlatforms: selectedPlatforms),
+        'Indie Darlings': _contentRepository.getIndieDarlings(limit: 10, selectedPlatforms: selectedPlatforms),
+        'Romance': _contentRepository.getMoviesByGenre('Romance', limit: 10, selectedPlatforms: selectedPlatforms),
+        'Comedy': _contentRepository.getMoviesByGenre('Comedy', limit: 10, selectedPlatforms: selectedPlatforms),
+      };
+
+      // Fetch all sections in parallel.
+      final results = await Future.wait(sectionsToFetch.values);
+
+      // Assign the fetched movies to their sections.
+      final keys = sectionsToFetch.keys.toList();
+      for (int i = 0; i < keys.length; i++) {
+        if (results[i].isNotEmpty) {
+          moviesByGenre[keys[i]] = results[i];
         }
       }
 
@@ -168,7 +193,16 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
 
     emit(state.copyWith(searchStatus: SearchStatus.loading));
     try {
-      final results = await _contentRepository.searchMoviesByTitle(event.query);
+      // Get selected streaming platforms for search, if feature is enabled
+      final selectedPlatforms = AppConfig.streamingFeatureEnabled
+          ? _streamingPlatformsCubit.selectedPlatformIds
+          : <String>[];
+      print('Searching with streaming platforms: ${selectedPlatforms.join(", ")}');
+      
+      final results = await _contentRepository.searchMoviesByTitle(
+        event.query,
+        selectedPlatforms: selectedPlatforms,
+      );
       emit(state.copyWith(
         searchStatus: SearchStatus.success,
         searchResults: results,

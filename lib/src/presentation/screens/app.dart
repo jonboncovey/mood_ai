@@ -12,6 +12,9 @@ import 'package:mood_ai/src/presentation/screens/discovery_screen.dart';
 import 'package:mood_ai/src/presentation/screens/genre_screen.dart';
 import 'package:mood_ai/src/presentation/screens/login_screen.dart';
 import 'package:mood_ai/src/presentation/screens/splash_screen.dart';
+import 'package:mood_ai/src/presentation/screens/loading_screen.dart';
+import 'package:mood_ai/src/presentation/screens/main_screen.dart';
+import 'package:mood_ai/src/screens/streaming_update_screen.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -43,6 +46,14 @@ class _AppState extends State<App> {
           builder: (context, state) => const LoginScreen(),
         ),
         GoRoute(
+          path: '/loading',
+          builder: (context, state) => const LoadingScreen(),
+        ),
+        GoRoute(
+          path: '/main',
+          builder: (context, state) => const MainScreen(),
+        ),
+        GoRoute(
           path: '/discovery',
           builder: (context, state) => const DiscoveryScreen(),
         ),
@@ -60,6 +71,10 @@ class _AppState extends State<App> {
             return GenreScreen(genre: genreName);
           },
         ),
+        GoRoute(
+          path: '/streaming-test',
+          builder: (context, state) => const StreamingUpdateScreen(),
+        ),
       ],
       redirect: (BuildContext context, GoRouterState state) {
         final authState = context.read<AuthCubit>().state;
@@ -71,7 +86,7 @@ class _AppState extends State<App> {
         }
         if (authState.status == AuthStatus.authenticated &&
             (location == '/login' || location == '/splash')) {
-          return '/discovery';
+          return '/loading';
         }
 
         return null;

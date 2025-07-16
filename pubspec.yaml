@@ -9,28 +9,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.8
   flutter_bloc: ^8.1.6
-  bloc: ^8.1.4
-  go_router: ^16.0.0
-  nested: ^1.0.0
-  shared_preferences: ^2.2.3
-  crypto: ^3.0.3
-  sqflite: ^2.3.3+1
-  path_provider: ^2.1.3
   equatable: ^2.0.5
-  google_fonts: ^6.2.1
-  rxdart: ^0.28.0
-  speech_to_text: ^7.1.0
-  audio_flux: ^1.2.1
-  flutter_soloud: ^3.2.1
-  flutter_recorder: ^1.1.2
+  go_router: ^14.2.7
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+  http: ^1.2.2
   flutter_dotenv: ^5.1.0
-  http: ^1.2.1
+  shared_preferences: ^2.3.2
+  speech_to_text: ^6.6.2
+  rxdart: ^0.28.0
+  csv: ^6.0.0
+  path_provider: ^2.1.1
+  share_plus: ^7.2.2
+  google_fonts: ^6.2.1
+  audio_flux: ^1.2.1
+  flutter_recorder: ^1.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  # The following line is a comment to force a dependency re-check.
+  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true

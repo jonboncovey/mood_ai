@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mood_ai/src/data/repositories/content_repository.dart';
 import 'package:mood_ai/src/logic/genre/genre_cubit.dart';
+import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/models/models.dart';
 
 class GenreScreen extends StatelessWidget {
@@ -15,6 +16,7 @@ class GenreScreen extends StatelessWidget {
       create: (context) => GenreCubit(
         contentRepository: context.read<ContentRepository>(),
         genre: genre,
+        streamingPlatformsCubit: context.read<StreamingPlatformsCubit>(),
       )..fetchMovies(),
       child: GenreView(genre: genre),
     );

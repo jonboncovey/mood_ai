@@ -53,3 +53,5 @@ class UpdateRecognizedText extends DiscoveryEvent {
 }
 
 class ClearSearch extends DiscoveryEvent {}
+
+class StreamingPlatformsChanged extends DiscoveryEvent {}

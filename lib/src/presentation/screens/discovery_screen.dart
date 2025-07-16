@@ -9,6 +9,7 @@ import 'package:mood_ai/src/data/repositories/content_repository.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_bloc.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_event.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_state.dart';
+import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/models/movie.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -73,6 +74,7 @@ class DiscoveryScreen extends StatelessWidget {
       create: (context) => DiscoveryBloc(
         contentRepository: RepositoryProvider.of<ContentRepository>(context),
         speechToText: SpeechToText(),
+        streamingPlatformsCubit: context.read<StreamingPlatformsCubit>(),
       )..add(FetchDiscoveryData()),
       child: const _DiscoveryView(),
     );
@@ -126,47 +128,45 @@ class _DiscoveryViewState extends State<_DiscoveryView> {
       builder: (context, state) {
         final isInSearchMode = state.searchStatus != SearchStatus.initial;
 
-        return Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Body
-              if (isInSearchMode)
-                _SearchResultsBody(
-                  state: state,
-                  topPadding: _searchBarHeight,
-                )
-              else
-                const _DiscoveryBody(),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Body
+            if (isInSearchMode)
+              _SearchResultsBody(
+                state: state,
+                topPadding: _searchBarHeight,
+              )
+            else
+              const _DiscoveryBody(),
 
-              // Voice Visualizer
-              if (state.isListening) const _VoiceVisualizer(),
+            // Voice Visualizer
+            if (state.isListening) const _VoiceVisualizer(),
 
-              // Search Bar
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                top: isInSearchMode ? MediaQuery.of(context).padding.top : null,
-                left: 16,
-                right: isInSearchMode ? 16 : (16 + 56 + 8),
-                bottom: isInSearchMode ? null : 24,
-                child: _SizeReportingWidget(
-                  onSizeChanged: (size) =>
-                      setState(() => _searchBarHeight = size.height),
-                  child: _SearchBar(controller: _searchController),
-                ),
+            // Search Bar
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              top: isInSearchMode ? 0 : null,
+              left: 16,
+              right: isInSearchMode ? 16 : (16 + 56 + 8),
+              bottom: isInSearchMode ? null : 24,
+              child: _SizeReportingWidget(
+                onSizeChanged: (size) =>
+                    setState(() => _searchBarHeight = size.height),
+                child: _SearchBar(controller: _searchController),
               ),
+            ),
 
-              // Mic Button
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                bottom: 24,
-                right: 16,
-                child: const _MicButton(),
-              ),
-            ],
-          ),
+            // Mic Button
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              bottom: 24,
+              right: 16,
+              child: const _MicButton(),
+            ),
+          ],
         );
       },
     );
@@ -423,18 +423,58 @@ class _DiscoveryBody extends StatelessWidget {
               onRefresh: () async {
                 context.read<DiscoveryBloc>().add(FetchDiscoveryData());
               },
-              child: ListView.builder(
-                // Added padding to ensure the last list item isn't hidden by the search bar.
-                padding: const EdgeInsets.only(bottom: 100),
-                itemCount: genres.length,
-                itemBuilder: (context, index) {
-                  final genre = genres[index];
-                  final movies = state.moviesByGenre[genre]!;
-                  if (index == 1) {
-                    return _GenreGrid(genre: genre, movies: movies);
-                  }
-                  return _GenreCarousel(genre: genre, movies: movies);
-                },
+              child: Column(
+                children: [
+                  // Streaming platforms filter indicator
+                  BlocBuilder<StreamingPlatformsCubit, StreamingPlatformsState>(
+                    builder: (context, platformsState) {
+                      if (platformsState.selectedPlatforms.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.filter_list,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Filtered by: ${platformsState.selectedPlatforms.map((p) => p.name).join(', ')}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      // Added padding to ensure the last list item isn't hidden by the search bar.
+                      padding: const EdgeInsets.only(bottom: 100),
+                      itemCount: genres.length,
+                      itemBuilder: (context, index) {
+                        final genre = genres[index];
+                        final movies = state.moviesByGenre[genre]!;
+                        if (index == 1) {
+                          return _GenreGrid(genre: genre, movies: movies);
+                        }
+                        return _GenreCarousel(genre: genre, movies: movies);
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
         }

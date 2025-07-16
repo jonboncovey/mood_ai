@@ -21,7 +21,7 @@ class DatabaseService {
   Future<Database> _initDatabase() async {
     // Get the directory path for both Android and iOS to store database.
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, 'movies_100k.db');
+    String path = join(documentsDirectory.path, 'big_movies.db');
 
     // Check if the database exists.
     bool dbExists = await databaseExists(path);
@@ -29,7 +29,7 @@ class DatabaseService {
     if (!dbExists) {
       // If not, copy from asset.
       try {
-        ByteData data = await rootBundle.load(join('assets', 'movies_100k.db'));
+        ByteData data = await rootBundle.load(join('assets', 'big_movies.db'));
         List<int> bytes =
             data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await File(path).writeAsBytes(bytes, flush: true);
@@ -39,7 +39,7 @@ class DatabaseService {
       }
     }
 
-    // Open the database.
-    return await openDatabase(path, readOnly: true);
+    // Open the database in read-write mode (removed readOnly: true)
+    return await openDatabase(path, version: 1);
   }
 }

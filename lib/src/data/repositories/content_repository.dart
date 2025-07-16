@@ -15,17 +15,47 @@ class ContentRepository {
     // Cleaned and unique genres from the provided list
   ];
 
-  Future<List<Movie>> getPopularMovies({int limit = 20}) async {
+  // Helper method to build streaming platform filter
+  String _buildStreamingFilter(List<String> selectedPlatforms) {
+    if (selectedPlatforms.isEmpty) {
+      return '';
+    }
+    
+    // Build OR conditions for each selected platform
+    final conditions = selectedPlatforms.map((platform) => 
+      "streaming_options LIKE '%\"$platform\":%'"
+    ).join(' OR ');
+    
+    return "streaming_options IS NOT NULL AND ($conditions)";
+  }
+
+  // Helper method to combine WHERE conditions
+  String _combineWhereConditions(String baseCondition, String streamingCondition) {
+    if (baseCondition.isEmpty && streamingCondition.isEmpty) {
+      return '';
+    } else if (baseCondition.isEmpty) {
+      return streamingCondition;
+    } else if (streamingCondition.isEmpty) {
+      return baseCondition;
+    } else {
+      return '$baseCondition AND $streamingCondition';
+    }
+  }
+
+  Future<List<Movie>> getPopularMovies({int limit = 20, List<String>? selectedPlatforms}) async {
     try {
       final db = await _databaseService.database;
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      
       final List<Map<String, dynamic>> maps = await db.query(
-        'movies',
+        'master_movies',
+        where: streamingFilter.isNotEmpty ? streamingFilter : null,
         orderBy: 'popularity DESC',
         limit: limit,
       );
 
       // ignore: avoid_print
-      print('Found ${maps.length} popular movies.');
+      print('Found ${maps.length} popular movies with streaming filter: ${selectedPlatforms?.join(", ") ?? "none"}');
 
       if (maps.isEmpty) {
         return [];
@@ -45,24 +75,103 @@ class ContentRepository {
     }
   }
 
+  Future<List<Movie>> getHiddenGems({int limit = 10, List<String>? selectedPlatforms}) async {
+    try {
+      final db = await _databaseService.database;
+      final baseCondition = 'vote_average > 7.5 AND vote_count > 100 AND popularity < 50';
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      final whereCondition = _combineWhereConditions(baseCondition, streamingFilter);
+      
+      final List<Map<String, dynamic>> maps = await db.query(
+        'master_movies',
+        where: whereCondition.isNotEmpty ? whereCondition : null,
+        orderBy: 'popularity DESC',
+        limit: limit,
+      );
+      
+      print('Found ${maps.length} hidden gems with streaming filter: ${selectedPlatforms?.join(", ") ?? "none"}');
+      
+      if (maps.isEmpty) return [];
+      return List.generate(maps.length, (i) => Movie.fromMap(maps[i]));
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching hidden gems: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Movie>> getIndieDarlings({int limit = 10, List<String>? selectedPlatforms}) async {
+    try {
+      final db = await _databaseService.database;
+      final baseCondition = 'budget > 0 AND budget < 1000000 AND popularity > 10';
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      final whereCondition = _combineWhereConditions(baseCondition, streamingFilter);
+      
+      final List<Map<String, dynamic>> maps = await db.query(
+        'master_movies',
+        where: whereCondition.isNotEmpty ? whereCondition : null,
+        orderBy: 'popularity DESC',
+        limit: limit,
+      );
+      
+      print('Found ${maps.length} indie darlings with streaming filter: ${selectedPlatforms?.join(", ") ?? "none"}');
+      
+      if (maps.isEmpty) return [];
+      return List.generate(maps.length, (i) => Movie.fromMap(maps[i]));
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching indie darlings: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Movie>> getCriticallyAcclaimed({int limit = 10, List<String>? selectedPlatforms}) async {
+    try {
+      final db = await _databaseService.database;
+      final baseCondition = 'vote_average > 8.0 AND vote_count > 500';
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      final whereCondition = _combineWhereConditions(baseCondition, streamingFilter);
+      
+      final List<Map<String, dynamic>> maps = await db.query(
+        'master_movies',
+        where: whereCondition.isNotEmpty ? whereCondition : null,
+        orderBy: 'vote_average DESC',
+        limit: limit,
+      );
+      
+      print('Found ${maps.length} critically acclaimed movies with streaming filter: ${selectedPlatforms?.join(", ") ?? "none"}');
+      
+      if (maps.isEmpty) return [];
+      return List.generate(maps.length, (i) => Movie.fromMap(maps[i]));
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching critically acclaimed movies: $e');
+      rethrow;
+    }
+  }
+
   Future<List<Movie>> getMoviesByGenre(
     String genre, {
     int page = 1,
     int limit = 20,
+    List<String>? selectedPlatforms,
   }) async {
     try {
       final db = await _databaseService.database;
+      final baseCondition = "genres LIKE '%$genre%'";
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      final whereCondition = _combineWhereConditions(baseCondition, streamingFilter);
+      
       final List<Map<String, dynamic>> maps = await db.query(
-        'movies',
-        where: "genres LIKE ?",
-        whereArgs: ['%$genre%'],
+        'master_movies',
+        where: whereCondition.isNotEmpty ? whereCondition : null,
         orderBy: 'popularity DESC',
         limit: limit,
         offset: (page - 1) * limit,
       );
 
       // ignore: avoid_print
-      print('Found ${maps.length} movies for genre: $genre, page: $page');
+      print('Found ${maps.length} movies for genre: $genre, page: $page, streaming filter: ${selectedPlatforms?.join(", ") ?? "none"}');
 
       if (maps.isEmpty) {
         return [];
@@ -75,14 +184,14 @@ class ContentRepository {
     }
   }
 
-  Future<List<Movie>> searchMoviesByQuery(String query) async {
+  Future<List<Movie>> searchMoviesByQuery(String query, {List<String>? selectedPlatforms}) async {
     if (query.isEmpty) return [];
 
     try {
       final prompt = '''
-You are a SQL expert. Given a user's movie request, your task is to generate a JSON object containing a SQL WHERE clause to find matching movies from a database with a table named 'movies'.
+You are a SQL expert. Given a user's movie request, your task is to generate a JSON object containing a SQL WHERE clause to find matching movies from a database with a table named 'master_movies'.
 
-The 'movies' table has the following relevant columns:
+The 'master_movies' table has the following relevant columns:
 - `genres`: A string containing one or more genres, like "Action, Drama, Comedy".
 - `overview`: A text description of the movie.
 - `title`: The movie title.
@@ -123,12 +232,17 @@ JSON Output:
       print('Using AI-generated WHERE clause: $whereClause');
 
       final db = await _databaseService.database;
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      final combinedWhereClause = _combineWhereConditions(whereClause, streamingFilter);
+      
       final List<Map<String, dynamic>> maps = await db.query(
-        'movies',
-        where: whereClause,
+        'master_movies',
+        where: combinedWhereClause.isNotEmpty ? combinedWhereClause : null,
         orderBy: 'popularity DESC',
         limit: 20, // Limit final results
       );
+
+      print('Found ${maps.length} search results with streaming filter: ${selectedPlatforms?.join(", ") ?? "none"}');
 
       final List<Movie> filteredMovies = maps.map(Movie.fromMap).toList();
 
@@ -170,7 +284,7 @@ JSON Output:
   }
 
   // Update the existing search method to use the new AI search
-  Future<List<Movie>> searchMoviesByTitle(String query, {int limit = 20}) async {
-    return searchMoviesByQuery(query);
+  Future<List<Movie>> searchMoviesByTitle(String query, {int limit = 20, List<String>? selectedPlatforms}) async {
+    return searchMoviesByQuery(query, selectedPlatforms: selectedPlatforms);
   }
 }

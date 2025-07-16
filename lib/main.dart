@@ -5,12 +5,15 @@ import 'package:mood_ai/src/data/repositories/auth_repository.dart';
 import 'package:mood_ai/src/data/repositories/content_repository.dart';
 import 'package:mood_ai/src/data/services/database_service.dart';
 import 'package:mood_ai/src/logic/auth/auth_cubit.dart';
+import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/presentation/screens/app.dart';
+import 'package:mood_ai/src/utils/streaming_cache.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseService.instance.database; // Initialize the database
+  await StreamingCache().load(); // Load the streaming cache
 
   final authRepository = AuthRepository();
   final databaseService = DatabaseService.instance;
@@ -27,6 +30,9 @@ Future<void> main() async {
           BlocProvider(
             create: (context) =>
                 AuthCubit(authRepository: authRepository)..checkAuthStatus(),
+          ),
+          BlocProvider(
+            create: (context) => StreamingPlatformsCubit(),
           ),
         ],
         child: const App(),
