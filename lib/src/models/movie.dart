@@ -71,13 +71,22 @@ class Movie extends Equatable {
   }
 
   factory Movie.fromMap(Map<String, dynamic> map) {
+    final rawGenres = map['genres'];
+    List<String>? genresList;
+    if (rawGenres is String) {
+      genresList =
+          rawGenres.split(',').map((e) => e.trim()).toList();
+    } else if (rawGenres is List) {
+      genresList = List<String>.from(rawGenres);
+    }
+
     return Movie(
-      id: map['id'] ?? 0,
-      title: map['title'],
-      voteAverage: map['vote_average']?.toDouble(),
+      id: map['id'] as int,
+      title: map['title'] as String?,
+      voteAverage: (map['vote_average'] as num?)?.toDouble(),
       voteCount: map['vote_count'],
       status: map['status'],
-      releaseDate: map['release_date'],
+      releaseDate: map['release_date'] as String?,
       revenue: map['revenue'],
       runtime: map['runtime'],
       adult: map['adult'] == 1,
@@ -87,11 +96,11 @@ class Movie extends Equatable {
       imdbId: map['imdb_id'],
       originalLanguage: map['original_language'],
       originalTitle: map['original_title'],
-      overview: map['overview'],
+      overview: map['overview'] as String?,
       popularity: map['popularity']?.toDouble(),
-      posterPath: map['poster_path'],
+      posterPath: map['poster_path'] as String?,
       tagline: map['tagline'],
-      genres: _parseGenres(map['genres']),
+      genres: genresList ?? [],
       productionCompanies: map['production_companies'],
       productionCountries: map['production_countries'],
       spokenLanguages: map['spoken_languages'],

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mood_ai/src/models/movie.dart';
 
 enum FetchStatus { initial, loading, success, failure }
@@ -15,6 +16,7 @@ class DiscoveryState extends Equatable {
     this.isListening = false,
     this.recognizedText = '',
     this.soundLevel = 0.0,
+    this.expandedMovieIndex,
   });
 
   final FetchStatus fetchStatus;
@@ -25,6 +27,7 @@ class DiscoveryState extends Equatable {
   final bool isListening;
   final String recognizedText;
   final double soundLevel;
+  final int? expandedMovieIndex;
 
   DiscoveryState copyWith({
     FetchStatus? fetchStatus,
@@ -35,6 +38,7 @@ class DiscoveryState extends Equatable {
     bool? isListening,
     String? recognizedText,
     double? soundLevel,
+    ValueGetter<int?>? expandedMovieIndex,
   }) {
     return DiscoveryState(
       fetchStatus: fetchStatus ?? this.fetchStatus,
@@ -45,6 +49,9 @@ class DiscoveryState extends Equatable {
       isListening: isListening ?? this.isListening,
       recognizedText: recognizedText ?? this.recognizedText,
       soundLevel: soundLevel ?? this.soundLevel,
+      expandedMovieIndex: expandedMovieIndex != null
+          ? expandedMovieIndex()
+          : this.expandedMovieIndex,
     );
   }
 
@@ -58,5 +65,6 @@ class DiscoveryState extends Equatable {
         isListening,
         recognizedText,
         soundLevel,
+        expandedMovieIndex,
       ];
 }

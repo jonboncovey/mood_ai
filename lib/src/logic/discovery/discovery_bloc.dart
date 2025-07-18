@@ -44,6 +44,7 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     on<VoiceSoundLevelChanged>(_onVoiceSoundLevelChanged);
     on<UpdateRecognizedText>(_onUpdateRecognizedText);
     on<ClearSearch>(_onClearSearch);
+    on<ToggleMovieExpanded>(_onToggleMovieExpanded);
 
     // Listen for streaming platform changes and refetch data
     _streamingPlatformsCubit.stream.listen((_) {
@@ -130,6 +131,19 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     Emitter<DiscoveryState> emit,
   ) {
     emit(state.copyWith(soundLevel: event.level));
+  }
+
+  void _onToggleMovieExpanded(
+    ToggleMovieExpanded event,
+    Emitter<DiscoveryState> emit,
+  ) {
+    if (state.expandedMovieIndex == event.movieIndex) {
+      // If the same movie is tapped again, collapse it
+      emit(state.copyWith(expandedMovieIndex: () => null));
+    } else {
+      // Otherwise, expand the new movie
+      emit(state.copyWith(expandedMovieIndex: () => event.movieIndex));
+    }
   }
 
   Future<void> _onFetchDiscoveryData(

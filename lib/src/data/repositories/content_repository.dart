@@ -23,10 +23,10 @@ class ContentRepository {
     
     // Build OR conditions for each selected platform
     final conditions = selectedPlatforms.map((platform) => 
-      "streaming_options LIKE '%\"$platform\":%'"
+      "streaming_info LIKE '%\"$platform\":%'"
     ).join(' OR ');
     
-    return "streaming_options IS NOT NULL AND ($conditions)";
+    return "streaming_info IS NOT NULL AND ($conditions)";
   }
 
   // Helper method to combine WHERE conditions
@@ -42,7 +42,8 @@ class ContentRepository {
     }
   }
 
-  Future<List<Movie>> getPopularMovies({int limit = 20, List<String>? selectedPlatforms}) async {
+  Future<List<Movie>> getPopularMovies(
+      {int limit = 20, int page = 1, List<String>? selectedPlatforms}) async {
     try {
       final db = await _databaseService.database;
       final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
@@ -52,6 +53,7 @@ class ContentRepository {
         where: streamingFilter.isNotEmpty ? streamingFilter : null,
         orderBy: 'popularity DESC',
         limit: limit,
+        offset: (page - 1) * limit,
       );
 
       // ignore: avoid_print
@@ -181,6 +183,50 @@ class ContentRepository {
       // ignore: avoid_print
       print('Error fetching movies by genre: $e');
       rethrow;
+    }
+  }
+
+  Future<List<Movie>> getMoviesByMood(String whereClause, {List<String>? selectedPlatforms}) async {
+    try {
+      final db = await _databaseService.database;
+      final streamingFilter = _buildStreamingFilter(selectedPlatforms ?? []);
+      final combinedWhereClause = _combineWhereConditions(whereClause, streamingFilter);
+
+      final List<Map<String, dynamic>> maps = await db.query(
+        'master_movies',
+        where: combinedWhereClause.isNotEmpty ? combinedWhereClause : null,
+        orderBy: 'popularity DESC',
+        limit: 50, // Limit results for mood queries
+      );
+      
+      print('Found ${maps.length} movies for mood with WHERE clause: $combinedWhereClause');
+
+      if (maps.isEmpty) {
+        return [];
+      }
+      return List.generate(maps.length, (i) => Movie.fromMap(maps[i]));
+    } catch (e) {
+      print('Error fetching movies by mood: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Movie>> getMoviesForMoodPreview(String whereClause) async {
+    try {
+      final db = await _databaseService.database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'master_movies',
+        where: whereClause,
+        orderBy: 'popularity DESC',
+        limit: 4,
+      );
+      if (maps.isEmpty) {
+        return [];
+      }
+      return List.generate(maps.length, (i) => Movie.fromMap(maps[i]));
+    } catch (e) {
+      print('Error fetching movies for mood preview: $e');
+      return []; // Return empty list on error
     }
   }
 

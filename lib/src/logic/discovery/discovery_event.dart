@@ -54,4 +54,13 @@ class UpdateRecognizedText extends DiscoveryEvent {
 
 class ClearSearch extends DiscoveryEvent {}
 
+class ToggleMovieExpanded extends DiscoveryEvent {
+  final int movieIndex;
+
+  const ToggleMovieExpanded(this.movieIndex);
+
+  @override
+  List<Object> get props => [movieIndex];
+}
+
 class StreamingPlatformsChanged extends DiscoveryEvent {}
