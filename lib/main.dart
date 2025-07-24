@@ -8,16 +8,25 @@ import 'package:mood_ai/src/logic/auth/auth_cubit.dart';
 import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/presentation/screens/app.dart';
 import 'package:mood_ai/src/utils/streaming_cache.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:mood_ai/src/logic/discovery/discovery_bloc.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:mood_ai/src/logic/discovery/discovery_event.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await dotenv.load(fileName: ".env");
   await DatabaseService.instance.database; // Initialize the database
   await StreamingCache().load(); // Load the streaming cache
 
   final authRepository = AuthRepository();
   final databaseService = DatabaseService.instance;
   final contentRepository = ContentRepository(databaseService: databaseService);
+  final speechToText = SpeechToText();
 
   runApp(
     MultiRepositoryProvider(
@@ -33,6 +42,14 @@ Future<void> main() async {
           ),
           BlocProvider(
             create: (context) => StreamingPlatformsCubit(),
+          ),
+          BlocProvider(
+            create: (context) => DiscoveryBloc(
+              contentRepository: contentRepository,
+              speechToText: speechToText,
+              streamingPlatformsCubit:
+                  BlocProvider.of<StreamingPlatformsCubit>(context),
+            )..add(const FetchDiscoveryData()),
           ),
         ],
         child: const App(),

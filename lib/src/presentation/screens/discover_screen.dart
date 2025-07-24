@@ -13,17 +13,18 @@ import 'package:mood_ai/src/models/movie.dart';
 import 'package:flutter/material.dart';
 import 'package:mood_ai/src/presentation/widgets/movie_card/expanded_movie_card.dart';
 import 'package:mood_ai/src/presentation/widgets/movie_card/movie_poster_card.dart';
-import 'package:mood_ai/src/presentation/widgets/search/voice_search_overlay.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 class DiscoverScreen extends StatefulWidget {
-  const DiscoverScreen({Key? key}) : super(key: key);
+  final double bottomPadding;
+  const DiscoverScreen({required this.bottomPadding, Key? key}) : super(key: key);
 
   @override
   _DiscoverScreenState createState() => _DiscoverScreenState();
 }
 
-class _DiscoverScreenState extends State<DiscoverScreen> {
+class _DiscoverScreenState extends State<DiscoverScreen>
+    with AutomaticKeepAliveClientMixin {
   MoodFilter? _selectedMood;
   List<Movie> _moodResults = [];
   bool _isLoading = false;
@@ -95,25 +96,22 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => DiscoveryBloc(
-        contentRepository: RepositoryProvider.of<ContentRepository>(context),
-        speechToText: SpeechToText(),
-        streamingPlatformsCubit: context.read<StreamingPlatformsCubit>(),
+    super.build(context); // Important for AutomaticKeepAliveClientMixin
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_selectedMood?.name ?? 'Discover Moods'),
+        leading: _selectedMood != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _clearMoodSelection,
+              )
+            : null,
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(_selectedMood?.name ?? 'Discover Moods'),
-          leading: _selectedMood != null
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: _clearMoodSelection,
-                )
-              : null,
-        ),
-        body: VoiceSearchOverlay(child: _buildBody()),
-      ),
+      body: _buildBody(),
     );
   }
 
@@ -140,7 +138,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   Widget _buildMoodGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, widget.bottomPadding + 16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,
@@ -255,7 +253,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 16, 16, widget.bottomPadding + 16),
       child: StaggeredGrid.count(
         crossAxisCount: 2,
         mainAxisSpacing: 8,

@@ -30,27 +30,24 @@ class _MicButtonState extends State<MicButton> {
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: 56,
-            height: 56,
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isListening
-                  ? Colors.red.withOpacity(0.7)
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
                   : Theme.of(context).colorScheme.primary,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 2,
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 12,
+                  spreadRadius: 1,
                   offset: const Offset(0, 4),
                 ),
-                if (_isButtonPressed || isListening)
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.4),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  )
               ],
+              border: _isButtonPressed
+                  ? Border.all(
+                      color: Theme.of(context).colorScheme.secondary, width: 2)
+                  : null,
             ),
             child: Icon(
               isListening ? Icons.mic : Icons.mic_none,

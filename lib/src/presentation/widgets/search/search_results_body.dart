@@ -11,10 +11,10 @@ import 'package:mood_ai/src/presentation/widgets/movie_card/movie_poster_card.da
 
 class SearchResultsBody extends StatelessWidget {
   final DiscoveryState state;
-  final double topPadding;
+  final double bottomPadding;
 
   const SearchResultsBody(
-      {required this.state, required this.topPadding, Key? key})
+      {required this.state, required this.bottomPadding, Key? key})
       : super(key: key);
 
   @override
@@ -31,44 +31,75 @@ class SearchResultsBody extends StatelessWidget {
         if (state.searchResults.isEmpty) {
           return const Center(child: Text('No results found.'));
         }
-        return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            12,
-            topPadding + MediaQuery.of(context).padding.top + 12,
-            12,
-            92, // For mic button and safe area
-          ),
-          child: StaggeredGrid.count(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            children: List.generate(state.searchResults.length, (index) {
-              final movie = state.searchResults[index];
-              final isExpanded = state.expandedMovieIndex == index;
 
-              final child = isExpanded
-                  ? ExpandedMovieCard(
-                      movie: movie,
-                      onCollapse: () => context
-                          .read<DiscoveryBloc>()
-                          .add(ToggleMovieExpanded(index)),
-                      onViewDetails: () => context.push('/details', extra: movie),
-                    )
-                  : GestureDetector(
-                      onTap: () => context
-                          .read<DiscoveryBloc>()
-                          .add(ToggleMovieExpanded(index)),
-                      child: MoviePosterCard(movie: movie),
-                    );
+        final tiles = _buildTiles(context, state.searchResults, state.expandedMovieIndex);
 
-              return StaggeredGridTile.count(
-                crossAxisCellCount: isExpanded ? 2 : 1,
-                mainAxisCellCount: isExpanded ? 2 : 1.5,
-                child: child,
-              );
-            }),
+        return Material(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              12,
+              MediaQuery.of(context).padding.top + 12,
+              12,
+              bottomPadding + 12,
+            ),
+            child: StaggeredGrid.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              children: tiles,
+            ),
           ),
         );
     }
+  }
+
+  List<StaggeredGridTile> _buildTiles(
+      BuildContext context, List<Movie> movies, int? expandedIndex) {
+    final List<StaggeredGridTile> tiles = [];
+    for (int i = 0; i < movies.length; i++) {
+      final movie = movies[i];
+      final isExpanded = expandedIndex == i;
+
+      if (isExpanded) {
+        // When a tile is expanded, it takes the full width.
+        // We also check if the *next* tile was the one that was expanded,
+        // and if so, we skip rendering the current tile to avoid an empty space.
+        if (expandedIndex == i + 1 && i.isEven) {
+          continue;
+        }
+        tiles.add(_buildExpandedTile(context, movie, i));
+      } else {
+        tiles.add(_buildCollapsedTile(context, movie, i));
+      }
+    }
+    return tiles;
+  }
+
+  StaggeredGridTile _buildExpandedTile(
+      BuildContext context, Movie movie, int index) {
+    return StaggeredGridTile.count(
+      crossAxisCellCount: 2,
+      mainAxisCellCount: 1.5,
+      child: ExpandedMovieCard(
+        movie: movie,
+        onCollapse: () =>
+            context.read<DiscoveryBloc>().add(ToggleMovieExpanded(index)),
+        onViewDetails: () => context.push('/details', extra: movie),
+      ),
+    );
+  }
+
+  StaggeredGridTile _buildCollapsedTile(
+      BuildContext context, Movie movie, int index) {
+    return StaggeredGridTile.count(
+      crossAxisCellCount: 1,
+      mainAxisCellCount: 1.5,
+      child: GestureDetector(
+        onTap: () =>
+            context.read<DiscoveryBloc>().add(ToggleMovieExpanded(index)),
+        child: MoviePosterCard(movie: movie),
+      ),
+    );
   }
 } 

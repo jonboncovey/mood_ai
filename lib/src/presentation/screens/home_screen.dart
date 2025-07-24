@@ -10,29 +10,20 @@ import 'package:mood_ai/src/logic/discovery/discovery_event.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_state.dart';
 import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/models/movie.dart';
-import 'package:mood_ai/src/presentation/widgets/search/voice_search_overlay.dart';
-import 'package:speech_to_text/speech_to_text.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final double bottomPadding;
+  const HomeScreen({required this.bottomPadding, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => DiscoveryBloc(
-        contentRepository: RepositoryProvider.of<ContentRepository>(context),
-        speechToText: SpeechToText(),
-        streamingPlatformsCubit: context.read<StreamingPlatformsCubit>(),
-      )..add(FetchDiscoveryData()),
-      child: const VoiceSearchOverlay(
-        child: _HomeBody(),
-      ),
-    );
+    return _HomeBody(bottomPadding: bottomPadding);
   }
 }
 
 class _HomeBody extends StatelessWidget {
-  const _HomeBody();
+  final double bottomPadding;
+  const _HomeBody({required this.bottomPadding});
 
   @override
   Widget build(BuildContext context) {
@@ -52,66 +43,23 @@ class _HomeBody extends StatelessWidget {
             final genres = state.moviesByGenre.keys.toList();
             return RefreshIndicator(
               onRefresh: () async {
-                context.read<DiscoveryBloc>().add(FetchDiscoveryData());
+                context
+                    .read<DiscoveryBloc>()
+                    .add(const FetchDiscoveryData(forceRefresh: true));
               },
-              child: Column(
-                children: [
-                  // Streaming platforms filter indicator
-                  BlocBuilder<StreamingPlatformsCubit, StreamingPlatformsState>(
-                    builder: (context, platformsState) {
-                      if (platformsState.selectedPlatforms.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-                      return Container(
-                        margin: const EdgeInsets.all(8.0),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 6.0),
-                        decoration: BoxDecoration(
-                          color:
-                              Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.filter_list,
-                              size: 16,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Filtered by: ${platformsState.selectedPlatforms.map((p) => p.name).join(', ')}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      // Added padding to ensure the last list item isn't hidden by the search bar.
-                      padding: const EdgeInsets.only(bottom: 100),
-                      itemCount: genres.length,
-                      itemBuilder: (context, index) {
-                        final genre = genres[index];
-                        final movies = state.moviesByGenre[genre]!;
-                        if (index == 1) {
-                          return _GenreGrid(genre: genre, movies: movies);
-                        }
-                        return _GenreCarousel(genre: genre, movies: movies);
-                      },
-                    ),
-                  ),
-                ],
+              child: ListView.builder(
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 16,
+                    bottom: bottomPadding + 16),
+                itemCount: genres.length,
+                itemBuilder: (context, index) {
+                  final genre = genres[index];
+                  final movies = state.moviesByGenre[genre]!;
+                  if (index == 1) {
+                    return _GenreGrid(genre: genre, movies: movies);
+                  }
+                  return _GenreCarousel(genre: genre, movies: movies);
+                },
               ),
             );
         }

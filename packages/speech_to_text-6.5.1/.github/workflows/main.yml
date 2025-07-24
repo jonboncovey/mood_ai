@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  test:
+    name: Test on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Flutter
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-flutter-v3
+        with:
+          # Flutter cache files are stored in `~/.flutter` on Linux/macOS
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+      - name: Install flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.5'
+          channel: 'stable'
+
+      - name: Get platform interface dependencies
+        run: flutter pub get
+        working-directory: speech_to_text_platform_interface
+
+      - name: Run platform interface tests
+        run: flutter test
+        working-directory: speech_to_text_platform_interface
+
+      - name: Get plugin dependencies
+        run: flutter pub get
+        working-directory: speech_to_text
+
+      - name: Run plugin tests
+        run: flutter test
+        working-directory: speech_to_text

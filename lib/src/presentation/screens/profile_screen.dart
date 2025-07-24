@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood_ai/src/config/app_config.dart';
+import 'package:mood_ai/src/logic/auth/auth_cubit.dart';
 import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/presentation/widgets/streaming_platforms_dialog.dart';
 
@@ -55,6 +56,14 @@ class ProfileScreen extends StatelessWidget {
                 context.go('/streaming-test');
               },
             ),
+          const Divider(),
+          ListTile(
+            leading: Icon(Icons.logout, color: Colors.red.shade400),
+            title: Text('Sign Out', style: TextStyle(color: Colors.red.shade400)),
+            onTap: () {
+              context.read<AuthCubit>().logOut();
+            },
+          ),
         ],
       ),
     );

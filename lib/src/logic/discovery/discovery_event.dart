@@ -7,7 +7,14 @@ abstract class DiscoveryEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class FetchDiscoveryData extends DiscoveryEvent {}
+class FetchDiscoveryData extends DiscoveryEvent {
+  final bool forceRefresh;
+
+  const FetchDiscoveryData({this.forceRefresh = false});
+
+  @override
+  List<Object> get props => [forceRefresh];
+}
 
 class SearchQueryChanged extends DiscoveryEvent {
   final String query;

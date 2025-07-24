@@ -40,7 +40,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="msauth"
-                    android:host="com.example.mood_ai"
+                    android:host="com.mood_ai.moviesapp"
                     android:path="/%2Flp2UiQUhRUX0GTuOqe0aogTCuU%3D" />
             </intent-filter>
         </activity>

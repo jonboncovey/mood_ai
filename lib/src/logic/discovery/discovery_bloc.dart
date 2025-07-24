@@ -150,6 +150,10 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     FetchDiscoveryData event,
     Emitter<DiscoveryState> emit,
   ) async {
+    // Only fetch if the data is not already loaded or if a refresh is forced
+    if (state.fetchStatus == FetchStatus.success && !event.forceRefresh) {
+      return;
+    }
     emit(state.copyWith(fetchStatus: FetchStatus.loading));
     try {
       final Map<String, List<Movie>> moviesByGenre = {};

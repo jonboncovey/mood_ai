@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "515870596935",
+    "project_id": "mood-ai-e442e",
+    "storage_bucket": "mood-ai-e442e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515870596935:android:c6999bf3fc64c449b77662",
+        "android_client_info": {
+          "package_name": "com.mood_ai.moviesapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJ7T9ZxJxWYmy4F3pS_A6qf_vqa528GiI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
