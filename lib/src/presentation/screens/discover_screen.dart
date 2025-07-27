@@ -135,7 +135,8 @@ class _DiscoverScreenState extends State<DiscoverScreen>
       return _buildResultsGrid();
     }
   }
-
+// whatre you in thee mood for?
+// swap content discover/home
   Widget _buildMoodGrid() {
     return GridView.builder(
       padding: EdgeInsets.fromLTRB(16, 16, 16, widget.bottomPadding + 16),

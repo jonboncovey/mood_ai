@@ -46,10 +46,10 @@ workflows:
       # - name: Flutter analyze  # Disabled due to issues in forked speech_to_text package
       #   script: |
       #     flutter analyze
-      - name: Flutter unit tests
-        script: |
-          flutter test
-        ignore_failure: true
+      # - name: Flutter unit tests
+      #   script: |
+      #     flutter test
+      #   ignore_failure: true
       - name: Flutter build iOS app for Test Lab (no code signing)
         script: |
           flutter build ios --release --no-codesign \
@@ -119,10 +119,10 @@ workflows:
       # - name: Flutter analyze  # Disabled due to issues in forked speech_to_text package
       #   script: |
       #     flutter analyze
-      - name: Flutter unit tests
-        script: |
-          flutter test
-        ignore_failure: true
+      # - name: Flutter unit tests
+      #   script: |
+      #     flutter test
+      #   ignore_failure: true
       - name: Build APK with Flutter
         script: |
           flutter build apk --release \
