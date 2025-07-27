@@ -95,10 +95,10 @@ workflows:
     environment:
       # android_signing:
       #   - keystore_reference
-      vars:
-        # Environment variables below are optional - only needed for automatic distribution
-        # FIREBASE_TOKEN: $FIREBASE_TOKEN
-        # FIREBASE_APP_ID_ANDROID: $FIREBASE_APP_ID_ANDROID
+      # vars:
+      #   # Environment variables below are optional - only needed for automatic distribution
+      #   # FIREBASE_TOKEN: $FIREBASE_TOKEN
+      #   # FIREBASE_APP_ID_ANDROID: $FIREBASE_APP_ID_ANDROID
       flutter: stable
     cache:
       cache_paths:
