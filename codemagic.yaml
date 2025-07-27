@@ -60,17 +60,13 @@ workflows:
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
-      # Firebase App Distribution
-      firebase:
-        firebase_token: $FIREBASE_TOKEN
-        android:
-          app_id: $FIREBASE_APP_ID_ANDROID
-          groups:
-            - testers
-        ios:
-          app_id: $FIREBASE_APP_ID_IOS
-          groups:
-            - testers
+      # Firebase App Distribution (Optional - remove if not using)
+      # firebase:
+      #   firebase_token: $FIREBASE_TOKEN
+      #   ios:
+      #     app_id: $FIREBASE_APP_ID_IOS
+      #     groups:
+      #       - testers
       # Email notifications
       email:
         recipients:
@@ -125,13 +121,13 @@ workflows:
       - build/app/outputs/**/mapping.txt
       - flutter_drive.log
     publishing:
-      # Firebase App Distribution
-      firebase:
-        firebase_token: $FIREBASE_TOKEN
-        android:
-          app_id: $FIREBASE_APP_ID_ANDROID
-          groups:
-            - testers
+      # Firebase App Distribution (Optional - remove if not using)
+      # firebase:
+      #   firebase_token: $FIREBASE_TOKEN
+      #   android:
+      #     app_id: $FIREBASE_APP_ID_ANDROID
+      #     groups:
+      #       - testers
       # Email notifications
       email:
         recipients:
