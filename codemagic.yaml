@@ -15,7 +15,15 @@ workflows:
         - $HOME/.gradle/caches
         - $HOME/Library/Caches/CocoaPods
     scripts:
-      - flutter build ios --simulator  # --flavor is optional
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+          cd ..
+      - name: Build for simulator
+        script: flutter build ios --simulator  # --flavor is optional
     artifacts:
       - build/ios/iphonesimulator/Runner.app
   ios-workflow:

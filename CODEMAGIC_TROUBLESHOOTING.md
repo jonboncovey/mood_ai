@@ -164,110 +164,15 @@ No test directory exists in the project
 3. **Click "Quick launch"** on the build page
 4. **Test your app** in the iOS simulator
 
+#### **White Screen on Simulator Launch**
+If your app launches to a blank white screen in the iOS simulator, it usually means a critical error occurred during startup before the Flutter UI could be rendered.
+
+**✅ Solution**:
+- **Ensure Setup Scripts are Present**: Your `codemagic.yaml` workflow **must** run `flutter pub get` and `pod install` *before* the `flutter build` command.
+- **Reason**: The build needs to fetch all Dart dependencies and link the native iOS Pods. A missing dependency is a common cause of a startup crash.
+- **Status**: ✅ **FIXED** - Added the necessary setup scripts to the `flutter-ios-simulator` workflow.
+ 
 #### **Build Timeout**
 ```
 Build exceeded maximum duration
 ```
-
-**🔧 Solutions**:
-1. **Increase timeout**: In `codemagic.yaml`:
-   ```yaml
-   max_build_duration: 90 # minutes
-   ```
-2. **Enable caching**: Speed up builds
-3. **Remove unused dependencies**: Reduce build time
-
-## 🛠️ **Step-by-Step Debugging**
-
-### **1. Check Local Build First**
-Before debugging CodeMagic, ensure your app builds locally:
-
-```bash
-# Android
-flutter build apk --debug
-
-# iOS (if on macOS)
-flutter build ios --debug --no-codesign
-```
-
-### **2. CodeMagic Build Logs**
-1. **Click failed build** → "View build"
-2. **Expand all sections** to see detailed logs
-3. **Look for first error** (usually near the top of failures)
-
-### **3. Common Log Locations**
-- **Android**: "Build APK with Flutter" section
-- **iOS**: "Flutter build ipa" section  
-- **Dependencies**: "Get Flutter packages" section
-- **Code signing**: "Set up code signing" section
-
-### **4. Enable Verbose Logging**
-Add to your `codemagic.yaml`:
-```yaml
-scripts:
-  - name: Flutter build with verbose output
-    script: |
-      flutter build apk --verbose
-```
-
-## 🔍 **Debugging Checklist**
-
-### **Before Each Build**:
-- [ ] All files committed and pushed to repository
-- [ ] No local build errors
-- [ ] Firebase files in correct locations
-- [ ] Bundle IDs match Firebase console
-
-### **Android Issues**:
-- [ ] `google-services.json` in `android/app/`
-- [ ] Android bundle ID: `com.mood_ai.moviesapp`
-- [ ] No conflicting Gradle plugins
-
-### **iOS Issues**:
-- [ ] `GoogleService-Info.plist` in `ios/Runner/`
-- [ ] iOS bundle ID: `com.mood-ai.moviesapp`
-- [ ] Apple Developer account connected
-- [ ] Code signing configured
-
-### **CodeMagic Setup**:
-- [ ] Repository connected and webhook active
-- [ ] Build triggers configured correctly
-- [ ] Environment variables set (if using Firebase distribution)
-- [ ] Sufficient build minutes remaining
-
-## 🆘 **Still Having Issues?**
-
-### **1. Test Minimal Configuration**
-Remove all optional features and try basic build:
-```yaml
-# Minimal codemagic.yaml for testing
-workflows:
-  android-test:
-    name: Android Test Build
-    environment:
-      flutter: stable
-    scripts:
-      - flutter pub get
-      - flutter build apk --debug
-    artifacts:
-      - build/app/outputs/**/*.apk
-```
-
-### **2. Contact Support**
-- **CodeMagic Support**: Build-specific issues
-- **Firebase Support**: Firebase configuration issues
-- **Flutter Community**: General Flutter build issues
-
-### **3. Alternative Testing**
-If CodeMagic continues failing:
-- **Local builds**: Test Android locally
-- **GitHub Actions**: Alternative CI/CD
-- **Firebase Test Lab**: Direct IPA upload for testing
-
-## 📊 **Build Status Meanings**
-
-- **✅ Passed**: Build successful, artifacts available
-- **❌ Failed**: Build error, check logs  
-- **⚠️ Cancelled**: Manually stopped or timeout
-- **🔄 Building**: Currently in progress
-- **⏸️ Queued**: Waiting for available build slot 
