@@ -1,4 +1,13 @@
 workflows:
+  flutter-ios-simulator:
+    name: Flutter iOS Simulator
+    environment:
+      flutter: 3.27.3
+      xcode: 16.2
+    scripts:
+      - flutter build ios --simulator --flavor staging  # --flavor is optional
+    artifacts:
+      - build/ios/iphonesimulator/Runner.app
   ios-workflow:
     name: iOS Workflow
     instance_type: mac_mini_m1
@@ -46,7 +55,7 @@ workflows:
       # - name: Flutter analyze  # Disabled due to issues in forked speech_to_text package
       #   script: |
       #     flutter analyze
-      # - name: Flutter unit tests
+      # - name: Flutter unit tests  # Disabled - no test directory exists
       #   script: |
       #     flutter test
       #   ignore_failure: true
@@ -119,7 +128,7 @@ workflows:
       # - name: Flutter analyze  # Disabled due to issues in forked speech_to_text package
       #   script: |
       #     flutter analyze
-      # - name: Flutter unit tests
+      # - name: Flutter unit tests  # Disabled - no test directory exists
       #   script: |
       #     flutter test
       #   ignore_failure: true
