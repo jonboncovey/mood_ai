@@ -22,8 +22,8 @@ workflows:
           cd ios
           pod install
           cd ..
-      - name: Build for simulator
-        script: flutter build ios --simulator  # --flavor is optional
+      - name: Build for simulator (using debug entrypoint)
+        script: flutter build ios --simulator -t lib/main_debug.dart # --flavor is optional
     artifacts:
       - build/ios/iphonesimulator/Runner.app
   ios-workflow:
