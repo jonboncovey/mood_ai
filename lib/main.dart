@@ -21,9 +21,9 @@ Future<void> main() async {
   );
   // await dotenv.load(fileName: ".env");
   // await DatabaseService.instance.database; // Initialize the database
-  await StreamingCache().load(); // Load the streaming cache
+  // await StreamingCache().load(); // Load the streaming cache
 
-  // final authRepository = AuthRepository();
+  final authRepository = AuthRepository();
   // final databaseService = DatabaseService.instance;
   // final contentRepository = ContentRepository(databaseService: databaseService);
   // final speechToText = SpeechToText();
