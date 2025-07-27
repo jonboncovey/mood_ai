@@ -49,16 +49,15 @@ Save the generated token - you'll need it for CodeMagic.
 
 ## Step 3: Update Dependencies
 
-Add Firebase App Distribution to your `pubspec.yaml`:
+**Note**: Firebase App Distribution plugin is **not needed** for CodeMagic builds. CodeMagic handles distribution natively through its configuration.
+
+Your existing `pubspec.yaml` dependencies are sufficient:
 
 ```yaml
 dependencies:
   firebase_core: ^3.15.1
+  firebase_auth: ^5.6.2
   # ... your existing dependencies
-
-dev_dependencies:
-  firebase_app_distribution: ^1.1.1
-  # ... your existing dev dependencies
 ```
 
 ## Step 4: CodeMagic Setup
@@ -71,10 +70,10 @@ dev_dependencies:
 ### 4.2 Configure Environment Variables
 In CodeMagic dashboard, add these encrypted variables:
 
-**Firebase Variables:**
-- `FIREBASE_TOKEN`: Your Firebase CI token
-- `FIREBASE_APP_ID_IOS`: iOS app ID from Firebase Console
-- `FIREBASE_APP_ID_ANDROID`: Android app ID from Firebase Console
+**Firebase Variables (Optional - only for automatic distribution):**
+- `FIREBASE_TOKEN`: Your Firebase CI token (skip if using Test Lab only)
+- `FIREBASE_APP_ID_IOS`: iOS app ID from Firebase Console (skip if using Test Lab only)
+- `FIREBASE_APP_ID_ANDROID`: Android app ID from Firebase Console (skip if using Test Lab only)
 
 **Apple Developer Variables:**
 - `APP_STORE_CONNECT_ISSUER_ID`: From App Store Connect API

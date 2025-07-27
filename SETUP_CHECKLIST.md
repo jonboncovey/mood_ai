@@ -8,6 +8,9 @@
 - [x] **macOS bundle ID updated** to match iOS
 - [x] **Platform-specific bundle IDs**: iOS uses hyphens, Android uses underscores
 - [x] **Test Lab ready**: Configuration works for both physical devices and Test Lab
+- [x] **🔧 BUILD ISSUES FIXED**: 
+  - Removed `firebase_app_distribution` dependency (Android build failures)
+  - Fixed iOS registrar scope in speech_to_text plugin (similar to Android fix)
 
 ## 📋 What You Need To Do
 
@@ -22,7 +25,9 @@
 - [ ] Enable **App Distribution** feature (optional - for future physical device testing)
 - [ ] Create tester group called `testers` (if using App Distribution)
 
-### 2. Firebase CLI Setup
+### 2. Firebase CLI Setup (Optional)
+**Only needed if you want automatic Firebase App Distribution**
+
 **Option A - NPM (Recommended):**
 - [ ] Install: `npm install -g firebase-tools`
 - [ ] Login: `firebase login:ci`
@@ -36,6 +41,9 @@
 - [ ] Download from [Firebase CLI releases](https://github.com/firebase/firebase-tools/releases)
 - [ ] Add to PATH, then run: `firebase login:ci`
 
+**Option D - Skip This Step:**
+- [ ] You can skip Firebase CLI and just use Test Lab with downloaded IPAs
+
 ### 3. Apple Developer Account (Optional for Test Lab)
 - [ ] Sign up for Apple Developer (free account works for development signing)
 - [ ] **Note**: Physical device registration not needed for Firebase Test Lab
@@ -47,12 +55,13 @@
 - [ ] Select this Flutter project
 
 ### 5. CodeMagic Environment Variables
-Add these encrypted variables in CodeMagic dashboard:
-- [ ] `FIREBASE_TOKEN` (from step 2)
-- [ ] `FIREBASE_APP_ID_IOS` (from Firebase Console)
-- [ ] `FIREBASE_APP_ID_ANDROID` (from Firebase Console)
+Add these for iOS code signing:
 - [ ] Set up iOS code signing (automatic or manual)
   - [ ] **Note**: For Test Lab only, basic development signing is sufficient
+- [ ] **Optional**: Firebase distribution variables (only if you want automatic distribution):
+  - [ ] `FIREBASE_TOKEN` (from step 2)  
+  - [ ] `FIREBASE_APP_ID_IOS` (from Firebase Console)
+  - [ ] `FIREBASE_APP_ID_ANDROID` (from Firebase Console)
 
 ### 6. Update Dependencies
 - [ ] Run: `flutter pub get`
@@ -123,6 +132,7 @@ After your CodeMagic build completes:
 
 ## 📞 Need Help?
 
-1. Check the detailed `CODEMAGIC_SETUP.md` guide
-2. Firebase console logs and CodeMagic build logs
-3. [Firebase Test Lab documentation](https://firebase.google.com/docs/test-lab) 
+1. **Build Failures**: Check `CODEMAGIC_TROUBLESHOOTING.md` (covers common issues)
+2. **Setup Guide**: Detailed `CODEMAGIC_SETUP.md` guide
+3. **Firebase Test Lab**: [Documentation](https://firebase.google.com/docs/test-lab)
+4. **CodeMagic Support**: For build-specific issues 

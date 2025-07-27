@@ -67,6 +67,7 @@ enum SpeechToTextError: Error {
 @available(iOS 10.0, *)
 public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     private var channel: FlutterMethodChannel
+    private var registrar: FlutterPluginRegistrar
     private var recognizer: SFSpeechRecognizer?
     private var currentRequest: SFSpeechAudioBufferRecognitionRequest?
     private var currentTask: SFSpeechRecognitionTask?
@@ -93,12 +94,13 @@ public class SwiftSpeechToTextPlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "plugin.csdcorp.com/speech_to_text", binaryMessenger: registrar.messenger())
-            let instance = SwiftSpeechToTextPlugin( channel )
+            let instance = SwiftSpeechToTextPlugin( channel, registrar )
             registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
-    init( _ channel: FlutterMethodChannel ) {
+    init( _ channel: FlutterMethodChannel, _ registrar: FlutterPluginRegistrar ) {
         self.channel = channel
+        self.registrar = registrar
         super.init()
     }
     
