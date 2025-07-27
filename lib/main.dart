@@ -7,7 +7,6 @@ import 'package:mood_ai/src/data/services/database_service.dart';
 import 'package:mood_ai/src/logic/auth/auth_cubit.dart';
 import 'package:mood_ai/src/logic/streaming_platforms/streaming_platforms_cubit.dart';
 import 'package:mood_ai/src/presentation/screens/app.dart';
-import 'package:mood_ai/src/utils/streaming_cache.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_bloc.dart';
@@ -19,28 +18,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // await dotenv.load(fileName: ".env");
-  // await DatabaseService.instance.database; // Initialize the database
-  // await StreamingCache().load(); // Load the streaming cache
+  await dotenv.load(fileName: ".env");
+  await DatabaseService.instance.database; // Initialize the database
 
-  // final authRepository = AuthRepository();
-  // final databaseService = DatabaseService.instance;
-  // final contentRepository = ContentRepository(databaseService: databaseService);
+  final authRepository = AuthRepository();
+  final databaseService = DatabaseService.instance;
+  final contentRepository = ContentRepository(databaseService: databaseService);
   final speechToText = SpeechToText();
 
-  runApp(
-    MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Debug'),
-        ),
-        body: const Center(
-          child: Text('It works!'),
-        ),
-      ),
-    ),
-  );
-  /*
   runApp(
     MultiRepositoryProvider(
       providers: [
@@ -69,5 +54,4 @@ Future<void> main() async {
       ),
     ),
   );
-  */
 }
