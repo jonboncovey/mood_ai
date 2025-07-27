@@ -113,6 +113,16 @@ Variable FIREBASE_TOKEN not found
 2. **Mark as encrypted**: For sensitive values
 3. **Verify names match**: Exactly as used in `codemagic.yaml`
 
+#### **Invalid Encryption Key Error**
+```
+Invalid encryption key - encrypted variables work only with builds in the same team they were created with
+```
+
+**✅ Solution**: 
+- **Fixed**: Removed `Encrypted(...)` placeholder values from `codemagic.yaml`
+- **Reason**: Variables were referenced as encrypted when they were just regular env vars or not needed
+- **Status**: ✅ **FIXED** - Now using Firebase Test Lab only (no automatic distribution needed)
+
 #### **Build Timeout**
 ```
 Build exceeded maximum duration

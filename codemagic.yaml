@@ -11,11 +11,12 @@ workflows:
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.mood-ai.moviesapp"
-        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...) # Add your App Store Connect Issuer ID
-        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...) # Add your App Store Connect Key ID
-        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...) # Add your App Store Connect Private Key
-        FIREBASE_TOKEN: Encrypted(...) # Add your Firebase CI token
-        FIREBASE_APP_ID_IOS: Encrypted(...) # Add your Firebase iOS App ID
+        # Environment variables below are optional - only needed for automatic distribution
+        # APP_STORE_CONNECT_ISSUER_ID: $APP_STORE_CONNECT_ISSUER_ID
+        # APP_STORE_CONNECT_KEY_IDENTIFIER: $APP_STORE_CONNECT_KEY_IDENTIFIER  
+        # APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
+        # FIREBASE_TOKEN: $FIREBASE_TOKEN
+        # FIREBASE_APP_ID_IOS: $FIREBASE_APP_ID_IOS
       flutter: stable
       cocoapods: default
     cache:
@@ -92,11 +93,12 @@ workflows:
     instance_type: linux_x2
     max_build_duration: 60
     environment:
-      android_signing:
-        - keystore_reference
+      # android_signing:
+      #   - keystore_reference
       vars:
-        FIREBASE_TOKEN: Encrypted(...) # Add your Firebase CI token
-        FIREBASE_APP_ID_ANDROID: Encrypted(...) # Add your Firebase Android App ID
+        # Environment variables below are optional - only needed for automatic distribution
+        # FIREBASE_TOKEN: $FIREBASE_TOKEN
+        # FIREBASE_APP_ID_ANDROID: $FIREBASE_APP_ID_ANDROID
       flutter: stable
     cache:
       cache_paths:
