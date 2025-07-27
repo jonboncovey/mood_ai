@@ -20,8 +20,8 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // await dotenv.load(fileName: ".env");
-  await DatabaseService.instance.database; // Initialize the database
-  // await StreamingCache().load(); // Load the streaming cache
+  // await DatabaseService.instance.database; // Initialize the database
+  await StreamingCache().load(); // Load the streaming cache
 
   // final authRepository = AuthRepository();
   // final databaseService = DatabaseService.instance;
