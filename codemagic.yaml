@@ -2,8 +2,18 @@ workflows:
   flutter-ios-simulator:
     name: Flutter iOS Simulator
     environment:
-      flutter: 3.27.3
+      flutter: stable
+      cocoapods: default
       xcode: 16.2
+      vars:
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        BUNDLE_ID: "com.mood-ai.moviesapp"
+    cache:
+      cache_paths:
+        - $FLUTTER_ROOT/.pub-cache
+        - $HOME/.gradle/caches
+        - $HOME/Library/Caches/CocoaPods
     scripts:
       - flutter build ios --simulator --flavor staging  # --flavor is optional
     artifacts:
