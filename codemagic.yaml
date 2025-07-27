@@ -53,10 +53,22 @@ workflows:
         script: |
           flutter build ipa --release \
             --build-name=1.0.$BUILD_NUMBER \
-            --build-number=$BUILD_NUMBER \
-            --export-options-plist=/Users/builder/export_options.plist
+            --build-number=$BUILD_NUMBER
+      - name: Create IPA manually if needed
+        script: |
+          if [ ! -f build/ios/ipa/*.ipa ]; then
+            echo "No IPA found, creating manually..."
+            mkdir -p build/ios/ipa
+            cd build/ios/iphoneos
+            mkdir -p Payload
+            cp -r Runner.app Payload/
+            zip -r ../ipa/Runner.ipa Payload/
+            cd ../../..
+          fi
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/archive/Runner.xcarchive
+      - build/ios/Runner.app
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
