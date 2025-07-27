@@ -81,10 +81,16 @@ This indicates the build failed before generating any output.
 
 #### **Provisioning Profile Errors**
 ```
-No provisioning profile found
+No matching profiles found for bundle identifier "com.mood-ai.moviesapp" and distribution type "development"
 ```
 
-**🔧 Solutions**:
+**✅ Solution**: 
+- **Fixed**: Disabled code signing entirely for Firebase Test Lab builds
+- **Changes**: Use `flutter build ios --no-codesign` instead of `flutter build ipa`
+- **Reason**: Test Lab doesn't require properly signed apps
+- **Status**: ✅ **FIXED** - Now builds unsigned IPA files for Test Lab
+
+**🔧 Alternative Solutions** (if you need signed builds later):
 1. **Enable automatic signing**: CodeMagic → iOS code signing → Automatic
 2. **Register bundle ID**: In Apple Developer portal
 3. **Use development certificates**: For Test Lab, production certs not needed

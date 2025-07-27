@@ -13,6 +13,7 @@
   - Fixed iOS registrar scope in speech_to_text plugin (similar to Android fix)
   - Fixed Objective-C wrapper instance property error
   - Removed `Encrypted(...)` placeholder values causing encryption key errors
+  - Disabled iOS code signing for Test Lab builds (no provisioning profiles needed)
 
 ## 📋 What You Need To Do
 

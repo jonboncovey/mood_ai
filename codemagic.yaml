@@ -4,9 +4,9 @@ workflows:
     instance_type: mac_mini_m1
     max_build_duration: 60
     environment:
-      ios_signing:
-        distribution_type: development
-        bundle_identifier: com.mood-ai.moviesapp
+      # ios_signing: # Disabled for Firebase Test Lab - no code signing needed
+      #   distribution_type: development
+      #   bundle_identifier: com.mood-ai.moviesapp
       vars:
         XCODE_WORKSPACE: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -50,22 +50,21 @@ workflows:
         script: |
           flutter test
         ignore_failure: true
-      - name: Flutter build ipa and automatic versioning
+      - name: Flutter build iOS app for Test Lab (no code signing)
         script: |
-          flutter build ipa --release \
+          flutter build ios --release --no-codesign \
             --build-name=1.0.$BUILD_NUMBER \
             --build-number=$BUILD_NUMBER
-      - name: Create IPA manually if needed
+      - name: Create IPA for Test Lab
         script: |
-          if [ ! -f build/ios/ipa/*.ipa ]; then
-            echo "No IPA found, creating manually..."
-            mkdir -p build/ios/ipa
-            cd build/ios/iphoneos
-            mkdir -p Payload
-            cp -r Runner.app Payload/
-            zip -r ../ipa/Runner.ipa Payload/
-            cd ../../..
-          fi
+          echo "Creating IPA for Firebase Test Lab..."
+          mkdir -p build/ios/ipa
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r ../ipa/Runner.ipa Payload/
+          cd ../../..
+          echo "IPA created at build/ios/ipa/Runner.ipa"
     artifacts:
       - build/ios/ipa/*.ipa
       - build/ios/archive/Runner.xcarchive
