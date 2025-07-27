@@ -19,8 +19,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await dotenv.load(fileName: ".env");
-  // await DatabaseService.instance.database; // Initialize the database
+  // await dotenv.load(fileName: ".env");
+  await DatabaseService.instance.database; // Initialize the database
   // await StreamingCache().load(); // Load the streaming cache
 
   // final authRepository = AuthRepository();
