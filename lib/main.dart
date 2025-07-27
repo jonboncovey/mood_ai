@@ -19,15 +19,28 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await dotenv.load(fileName: ".env");
-  await DatabaseService.instance.database; // Initialize the database
-  await StreamingCache().load(); // Load the streaming cache
+  // await dotenv.load(fileName: ".env");
+  // await DatabaseService.instance.database; // Initialize the database
+  // await StreamingCache().load(); // Load the streaming cache
 
-  final authRepository = AuthRepository();
-  final databaseService = DatabaseService.instance;
-  final contentRepository = ContentRepository(databaseService: databaseService);
-  final speechToText = SpeechToText();
+  // final authRepository = AuthRepository();
+  // final databaseService = DatabaseService.instance;
+  // final contentRepository = ContentRepository(databaseService: databaseService);
+  // final speechToText = SpeechToText();
 
+  runApp(
+    MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Debug'),
+        ),
+        body: const Center(
+          child: Text('It works!'),
+        ),
+      ),
+    ),
+  );
+  /*
   runApp(
     MultiRepositoryProvider(
       providers: [
@@ -56,4 +69,5 @@ Future<void> main() async {
       ),
     ),
   );
+  */
 }
