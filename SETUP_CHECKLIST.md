@@ -14,6 +14,7 @@
   - Fixed Objective-C wrapper instance property error
   - Removed `Encrypted(...)` placeholder values causing encryption key errors
   - Disabled iOS code signing for Test Lab builds (no provisioning profiles needed)
+  - Disabled Flutter analyze step (154 issues in forked speech_to_text package)
 
 ## 📋 What You Need To Do
 
