@@ -15,7 +15,7 @@ workflows:
         - $HOME/.gradle/caches
         - $HOME/Library/Caches/CocoaPods
     scripts:
-      - flutter build ios --simulator --flavor staging  # --flavor is optional
+      - flutter build ios --simulator  # --flavor is optional
     artifacts:
       - build/ios/iphonesimulator/Runner.app
   ios-workflow:
