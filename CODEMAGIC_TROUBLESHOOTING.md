@@ -25,6 +25,17 @@ SwiftSpeechToTextPlugin.swift:204:23
 - **Changes**: Added registrar as instance variable, updated constructor
 - **Status**: ✅ **FIXED** (similar to Android registrar fix)
 
+#### **Speech-to-Text Plugin Instance Property Error**
+```
+Semantic Issue (Xcode): Property 'instance' not found on object of type 'SpeechToTextPlugin *'
+SpeechToTextPlugin.m:16:10
+```
+
+**✅ Solution**: 
+- **Fixed**: Removed unnecessary `handleMethodCall` method from Objective-C wrapper
+- **Reason**: Swift class handles method calls directly after registration
+- **Status**: ✅ **FIXED**
+
 #### **Gradle Build Issues**
 ```
 Gradle task 'bundleDebug' failed with exit code 1

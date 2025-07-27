@@ -11,6 +11,7 @@
 - [x] **🔧 BUILD ISSUES FIXED**: 
   - Removed `firebase_app_distribution` dependency (Android build failures)
   - Fixed iOS registrar scope in speech_to_text plugin (similar to Android fix)
+  - Fixed Objective-C wrapper instance property error
 
 ## 📋 What You Need To Do
 
