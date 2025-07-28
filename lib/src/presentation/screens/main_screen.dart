@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide SearchBar;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_bloc.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_event.dart';
 import 'package:mood_ai/src/logic/discovery/discovery_state.dart';
@@ -134,6 +135,21 @@ class _MainScreenState extends State<MainScreen> {
         final isListening = state.isListening;
 
         return Scaffold(
+          appBar: AppBar(
+            title: Text('mood', style: GoogleFonts.dynaPuff(fontSize: 32)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            actions: <Widget>[
+              // IconButton(
+              //   icon: const Icon(Icons.filter_list),
+              //   onPressed: () {
+              //     // TODO: Implement filter functionality.
+              //   },
+              // ),
+            ],
+          ),
           body: Stack(
             fit: StackFit.expand,
             clipBehavior: Clip.none, // Allow shadows to escape the stack

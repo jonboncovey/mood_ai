@@ -43,7 +43,7 @@ class SearchBar extends StatelessWidget {
                     fillColor: Colors.transparent,
                     border: InputBorder.none,
                     hintText:
-                        isListening ? 'Listening...' : "What's your mood?",
+                        isListening ? 'Listening...' : "What're you in the mood for?",
                     suffixIcon: isInSearchMode
                         ? IconButton(
                             icon: const Icon(Icons.clear),
