@@ -111,8 +111,8 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> _buildWidgetOptions() {
     // Pass the search bar height as bottom padding to the screens that need it.
     return <Widget>[
-      HomeScreen(bottomPadding: _searchBarHeight),
       DiscoverScreen(bottomPadding: _searchBarHeight),
+      HomeScreen(bottomPadding: _searchBarHeight),
       const ProfileScreen(),
     ];
   }
@@ -206,12 +206,12 @@ class _MainScreenState extends State<MainScreen> {
           bottomNavigationBar: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
                 icon: Icon(Icons.search),
                 label: 'Discover',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person),
